@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>労働組合 組織運営評価レポート</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    line-height: 1.8;
+  }
+
+  .report {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 48px 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+  }
+  .header .meta {
+    margin-top: 24px;
+    display: flex;
+    gap: 32px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+  .header .meta .num { font-size: 20px; font-weight: 600; color: #e94560; }
+
+  /* ── Score Badge ── */
+  .overall-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 32px 60px;
+    background: #fafbfc;
+    border-bottom: 1px solid #eee;
+  }
+  .score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#e94560 0% calc(var(--pct) * 1%), #eee calc(var(--pct) * 1%) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .score-circle .inner {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-circle .val { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+  .score-circle .of { font-size: 11px; color: #999; }
+  .score-desc h3 { font-size: 14px; color: #999; font-weight: 400; margin-bottom: 4px; }
+  .score-desc p { font-size: 13px; color: #666; max-width: 400px; }
+
+  /* ── Sections ── */
+  .content { padding: 0 60px 60px; }
+  .section { margin-top: 48px; }
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e94560;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .num-badge {
+    background: #e94560;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* ── Radar Charts ── */
+  .radar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 16px;
+  }
+  .radar-card {
+    background: #fafbfc;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #eee;
+  }
+  .radar-card.full { grid-column: 1 / -1; }
+  .radar-card h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .radar-card canvas { max-height: 340px; }
+  .radar-card.full canvas { max-height: 420px; }
+
+  /* ── Table ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .data-table thead th {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 10px 12px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  .data-table thead th:first-child { text-align: left; border-radius: 6px 0 0 0; }
+  .data-table thead th:last-child { border-radius: 0 6px 0 0; }
+  .data-table tbody td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .data-table tbody td:first-child { text-align: left; font-weight: 500; }
+  .data-table tbody tr:hover { background: #f8f9ff; }
+  .data-table .score-high { color: #0f9960; font-weight: 600; }
+  .data-table .score-mid { color: #d9822b; }
+  .data-table .score-low { color: #e94560; font-weight: 600; }
+
+  /* ── Ranking bar ── */
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .rank-item .rank-num {
+    width: 24px;
+    text-align: right;
+    font-weight: 600;
+    color: #999;
+  }
+  .rank-item .rank-name {
+    width: 100px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .rank-item .rank-bar-wrap {
+    flex: 1;
+    height: 22px;
+    background: #f0f2f5;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .rank-item .rank-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .rank-item .rank-val {
+    width: 40px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  /* ── Issue cards ── */
+  .issue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .issue-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 4px solid #e94560;
+  }
+  .issue-card.strength { border-left-color: #0f9960; }
+  .issue-card h5 { font-size: 12px; color: #999; margin-bottom: 8px; letter-spacing: 1px; }
+  .issue-card ul { list-style: none; padding: 0; }
+  .issue-card li {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f5f5f5;
+    display: flex;
+    justify-content: space-between;
+  }
+  .issue-card li:last-child { border: none; }
+  .issue-card .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #fef3f5;
+    color: #e94560;
+    font-weight: 500;
+  }
+  .issue-card.strength .tag { background: #e6f7ef; color: #0f9960; }
+
+  /* ── Commentary ── */
+  .commentary {
+    background: #fafbfc;
+    border-radius: 12px;
+    padding: 32px;
+    border: 1px solid #eee;
+    margin-top: 24px;
+  }
+  .commentary h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  .commentary p {
+    font-size: 13px;
+    color: #444;
+    margin-bottom: 14px;
+    text-indent: 1em;
+  }
+  .commentary .highlight {
+    background: linear-gradient(transparent 60%, rgba(233,69,96,0.12) 60%);
+    font-weight: 500;
+  }
+  .commentary ul {
+    margin: 8px 0 16px 20px;
+    font-size: 13px;
+    color: #444;
+  }
+  .commentary li { margin-bottom: 6px; }
+
+  /* ── Free comments ── */
+  .free-comments {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .fc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12.5px;
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-radius: 6px;
+    border: 1px solid #eee;
+  }
+  .fc-item .fc-name { font-weight: 600; color: #1a1a2e; white-space: nowrap; }
+  .fc-item .fc-text { color: #555; }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 24px 60px;
+    background: #1a1a2e;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    text-align: center;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .report { box-shadow: none; }
+    .section { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="report">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="label">Organization Assessment Report</div>
+    <h1>労働組合 組織運営評価レポート</h1>
+    <div class="subtitle">組織力診断アンケート集計・分析結果</div>
+    <div class="meta">
+      <span>回答組合数 <span class="num">21</span></span>
+      <span>設問数 <span class="num">50</span></span>
+      <span>カテゴリ <span class="num">7</span></span>
+      <span>調査日 2026年3月7日</span>
+    </div>
+  </div>
+
+  <!-- Overall Score -->
+  <div class="overall-score">
+    <div class="score-circle" style="--pct: 81.6">
+      <div class="inner">
+        <span class="val">4.08</span>
+        <span class="of">/ 5.00</span>
+      </div>
+    </div>
+    <div class="score-desc">
+      <h3>全体総合評価</h3>
+      <p>21組合の全50設問における総合平均スコアは <strong>4.08</strong>（5段階評価）。全体として「やや十分」水準にあり、組織運営は概ね良好と判断されます。ただし、組合間の格差が大きく（最高5.00〜最低2.00）、個別の支援が必要な組合が存在します。</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Section 1: Radar Charts -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">1</span>
+        カテゴリ別評価（レーダーチャート）
+      </div>
+
+      <div class="radar-grid">
+        <div class="radar-card full">
+          <h4>全体平均 ／ グループ別比較</h4>
+          <canvas id="radarMain"></canvas>
+        </div>
+        <div class="radar-card">
+          <h4>上位グループ（10組合）</h4>
+          <canvas id="radarTop"></canvas>
+        </div>
+        <div class="radar-card">
+          <h4>要支援グループ（3組合）</h4>
+          <canvas id="radarLow"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Ranking -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">2</span>
+        組合別 総合スコアランキング
+      </div>
+      <div id="rankingBars"></div>
+    </div>
+
+    <!-- Section 3: Detail Table -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">3</span>
+        組合別 × カテゴリ別 評価マトリクス
+      </div>
+      <table class="data-table" id="matrixTable">
+        <thead>
+          <tr>
+            <th>組合名</th>
+            <th>A 機関運営</th>
+            <th>B 参加・参画</th>
+            <th>C 労使関係</th>
+            <th>D 職場活動</th>
+            <th>E 社会貢献</th>
+            <th>F 福祉・共済</th>
+            <th>G 人材育成</th>
+            <th>総合</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Section 4: Strengths & Issues -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">4</span>
+        設問別 強み・課題
+      </div>
+      <div class="issue-grid">
+        <div class="issue-card strength">
+          <h5>STRENGTHS &mdash; 上位5設問</h5>
+          <ul id="topQuestions"></ul>
+        </div>
+        <div class="issue-card">
+          <h5>ISSUES &mdash; 下位5設問</h5>
+          <ul id="bottomQuestions"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Free Comments -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">5</span>
+        自由記述（意見・提言）
+      </div>
+      <div class="free-comments" id="freeComments"></div>
+    </div>
+
+    <!-- Section 6: Qualitative Commentary -->
+    <div class="section">
+      <div class="section-title">
+        <span class="num-badge">6</span>
+        定性的分析コメント
+      </div>
+
+      <div class="commentary">
+        <h4>1. 全体傾向</h4>
+        <p>今回の調査では21組合から回答を得た。全体平均4.08は5段階中「やや十分」に相当し、<span class="highlight">組織運営の基盤は概ね整備されている</span>と評価できる。カテゴリ別では「A 機関運営」が4.18と最も高く、大会運営や役員選挙など制度的な基盤は比較的充実している。一方、「B 参加・参画」が4.01と最も低く、組合員の日常的な関与に改善の余地がある。</p>
+
+        <h4>2. 組合間格差の深刻さ</h4>
+        <p>最大の課題は<span class="highlight">組合間の評価格差</span>である。高橋精機・山田産業など6組合が全項目満点（5.00）である一方、佐々木物流（2.00）・田中金属（2.36）・渡辺運送（2.50）の3組合は全カテゴリで平均3.0を下回っている。この3組合に対しては、組織運営全般にわたる重点的な支援プログラムの策定が急務である。</p>
+        <p>なお、6組合が全50問で「十分」と回答している点については、回答の精度や意識の差も考慮に入れる必要がある。今後、より踏み込んだヒアリング調査との併用が望ましい。</p>
+
+        <h4>3. カテゴリ別の注目点</h4>
+        <p><strong>【B 参加・参画】</strong>全カテゴリ中最も低い4.01。特に「<span class="highlight">組合員が気軽に相談できる場所・環境</span>」が全設問中最低の3.76と突出して低く、相談窓口の設置や心理的安全性の向上が組織横断的な課題であることを示している。また「役員は組合員の意見を十分把握できているか」にも複数の「やや不足」が見られ、現場の声が執行部に届きにくい構造的問題が推察される。</p>
+        <p><strong>【E 社会貢献活動】</strong>「連合・産別の社会貢献活動への参加」と「オリジナル社会貢献活動」がともに3.86と低い。社会貢献活動は優先度が下がりやすい分野であり、活動の意義を再認識する機会の創出が必要である。地域・行政とのつながりに関する設問にも「まあまあ」以下の回答が散見される。</p>
+        <p><strong>【G 人材育成】</strong>「役員経験者が各場面で労働組合の経験を活かし活躍しているか」（㊿）が3.86と低く、OB人材の活用が十分に進んでいない。後継者育成やOJTに関する設問も中位にとどまっており、<span class="highlight">体系的な人材パイプラインの構築</span>が中長期的な組織強化の鍵となる。</p>
+
+        <h4>4. 要支援組合の個別所見</h4>
+        <ul>
+          <li><strong>佐々木物流</strong>（平均2.00）：全項目「やや不足」の一律回答。組織運営のあらゆる面で基盤が不足。自由記述では「組合費の見直し」を挙げており、財政面から組合活動自体に疑問を持っている可能性がある。まずは役員との個別面談による実態把握が必要。</li>
+          <li><strong>田中金属</strong>（平均2.36）：特に「D 職場活動」（2.14）と「F 福祉・共済」（2.14）が低い。職場のパイプ役が機能しておらず、「コミュニケーション改善」の要望はその表れ。職場委員の配置と教育が急務。</li>
+          <li><strong>渡辺運送</strong>（平均2.50）：「若手の参加率向上」を課題に挙げており、世代間ギャップが組織運営全体に影響している可能性がある。若年層向けのイベント企画やSNS活用など、参加ハードルの低い取り組みの導入を検討すべき。</li>
+          <li><strong>前田ゴム</strong>（平均3.00・標準偏差1.43）：回答にばらつきが大きく、得意・不得意が明確。「B 参加・参画」（2.86）「E 社会貢献」（2.57）「G 人材育成」（2.62）が特に弱い一方、「A 機関運営」「F 福祉」は3.43と相対的にマシ。弱点カテゴリへの集中的な支援が効果的。</li>
+        </ul>
+
+        <h4>5. 今後に向けた提言</h4>
+        <ul>
+          <li><strong>相談環境の整備</strong>：全体最低スコアの「相談場所・環境」（3.76）について、オンライン相談窓口の開設やメンター制度の導入を検討する。</li>
+          <li><strong>要支援3組合への個別対応</strong>：佐々木物流・田中金属・渡辺運送に対し、他組合の好事例共有・合同研修・役員交流会など、底上げ施策を優先実施する。</li>
+          <li><strong>回答精度の向上</strong>：全問満点回答が6組合ある点を踏まえ、次回調査では設問設計の見直し（逆転項目の導入、具体的行動レベルの設問等）を検討する。</li>
+          <li><strong>社会貢献・人材育成の活性化</strong>：下位設問に集中する2カテゴリについて、先進事例の横展開や産別との連携強化を進める。</li>
+          <li><strong>定期的モニタリング</strong>：年1回以上の定点調査を継続し、改善施策の効果測定を行う体制を構築する。</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    労働組合 組織運営評価レポート &mdash; 2026年3月7日作成
+  </div>
+</div>
+
+<script>
+const DATA = {
+  catLabels: ["A 機関運営", "B 参加・参画", "C 労使関係", "D 職場活動", "E 社会貢献活動", "F 福祉・共済活動", "G 人材育成"],
+  overall: [4.18, 4.01, 4.10, 4.06, 4.02, 4.11, 4.06],
+  topAvg: [4.84, 4.80, 4.87, 4.90, 4.86, 4.90, 4.90],
+  midAvg: [4.00, 3.66, 3.84, 3.69, 3.62, 3.82, 3.69],
+  lowAvg: [2.43, 2.33, 2.24, 2.24, 2.29, 2.24, 2.25],
+  unions: [
+    {name:"高橋精機",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"安定した運営"},
+    {name:"山田産業",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"研修の質向上"},
+    {name:"松本電機",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"職場巡回の強化"},
+    {name:"斎藤サービス",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"賃上げ要求の強化"},
+    {name:"岡田通信",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"役員選出の透明化"},
+    {name:"長谷川農機",cats:[5,5,5,5,5,5,5],avg:5.00,comment:"特になし"},
+    {name:"小林工業",cats:[4.71,4.29,5,5,5,5,5],avg:4.86,comment:"福利厚生の充実"},
+    {name:"伊藤化学",cats:[4.71,4.71,4.86,4.71,4.71,4.71,4.75],avg:4.74,comment:"他支部の事例が知りたい"},
+    {name:"佐藤建機",cats:[4.57,4.43,4.43,4.71,4.43,4.71,4.75],avg:4.58,comment:"役員の負担軽減"},
+    {name:"加藤不動産",cats:[4.43,4.57,4.43,4.57,4.43,4.57,4.50],avg:4.50,comment:"デジタル化の推進"},
+    {name:"木村造船",cats:[4.43,4.43,4.43,4.43,4.43,4.43,4.25],avg:4.40,comment:"時短の推進"},
+    {name:"上田産業",cats:[4.86,3.71,4.29,3.71,3.71,4.14,4.00],avg:4.06,comment:"他の組合の事例を知りたい"},
+    {name:"山田商事",cats:[4.86,3.71,4.29,3.71,3.71,4.14,4.00],avg:4.06,comment:"特になし"},
+    {name:"鈴木電装",cats:[4.00,3.86,4.29,4.00,4.14,3.86,4.12],avg:4.04,comment:"教育の充実を希望"},
+    {name:"井上食品",cats:[4.00,4.00,4.00,4.00,4.00,4.00,4.00],avg:4.00,comment:"広報誌の内容改善"},
+    {name:"吉田システム",cats:[3.43,3.71,3.43,3.57,3.43,3.57,3.50],avg:3.52,comment:"定期的なアンケート希望"},
+    {name:"中村印刷",cats:[3.00,3.00,3.00,3.00,3.00,3.00,3.00],avg:3.00,comment:"現状維持"},
+    {name:"前田ゴム",cats:[3.43,2.86,3.00,3.14,2.57,3.43,2.62],avg:3.00,comment:"ワークライフバランス"},
+    {name:"渡辺運送",cats:[2.43,2.57,2.43,2.57,2.43,2.57,2.50],avg:2.50,comment:"若手の参加率向上"},
+    {name:"田中金属",cats:[2.86,2.43,2.29,2.14,2.43,2.14,2.25],avg:2.36,comment:"コミュニケーション改善"},
+    {name:"佐々木物流",cats:[2.00,2.00,2.00,2.00,2.00,2.00,2.00],avg:2.00,comment:"組合費の見直し"}
+  ],
+  top5: [
+    {name:"⑥役員の活動分担…タイムマネジメント",cat:"A",avg:4.38},
+    {name:"④相談できる議員がいるか",cat:"E",avg:4.29},
+    {name:"⑤組合員への情報提供",cat:"D",avg:4.29},
+    {name:"⑦組合の各種情報を十分得られているか",cat:"B",avg:4.29},
+    {name:"④役員選挙は全員投票に準じている",cat:"A",avg:4.29}
+  ],
+  bottom5: [
+    {name:"⑥組合員が気軽に相談できる場所・環境",cat:"B",avg:3.76},
+    {name:"②職場の慶弔情報の把握の仕組み",cat:"D",avg:3.86},
+    {name:"①連合・産別の社会貢献活動への参加",cat:"E",avg:3.86},
+    {name:"②オリジナル社会貢献活動の実施",cat:"E",avg:3.86},
+    {name:"㊿役員経験者の経験活用",cat:"G",avg:3.86}
+  ]
+};
+
+// ── Radar: Main ──
+const radarOpts = (max = 5) => ({
+  responsive: true,
+  maintainAspectRatio: true,
+  scales: {
+    r: {
+      min: 0, max,
+      ticks: { stepSize: 1, font: { size: 10 }, backdropColor: 'transparent' },
+      pointLabels: { font: { size: 11, family: "'Noto Sans JP'" } },
+      grid: { color: 'rgba(0,0,0,0.06)' },
+      angleLines: { color: 'rgba(0,0,0,0.06)' }
+    }
+  },
+  plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: "'Noto Sans JP'" }, padding: 16 } } }
+});
+
+new Chart(document.getElementById('radarMain'), {
+  type: 'radar',
+  data: {
+    labels: DATA.catLabels,
+    datasets: [
+      { label: '全体平均', data: DATA.overall, borderColor: '#1a1a2e', backgroundColor: 'rgba(26,26,46,0.08)', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#1a1a2e' },
+      { label: '上位G (10組合)', data: DATA.topAvg, borderColor: '#0f9960', backgroundColor: 'rgba(15,153,96,0.06)', borderWidth: 2, borderDash: [6,3], pointRadius: 3, pointBackgroundColor: '#0f9960' },
+      { label: '中位G (8組合)', data: DATA.midAvg, borderColor: '#d9822b', backgroundColor: 'rgba(217,130,43,0.06)', borderWidth: 2, borderDash: [6,3], pointRadius: 3, pointBackgroundColor: '#d9822b' },
+      { label: '要支援G (3組合)', data: DATA.lowAvg, borderColor: '#e94560', backgroundColor: 'rgba(233,69,96,0.08)', borderWidth: 2, borderDash: [6,3], pointRadius: 3, pointBackgroundColor: '#e94560' }
+    ]
+  },
+  options: radarOpts()
+});
+
+// ── Radar: Top ──
+new Chart(document.getElementById('radarTop'), {
+  type: 'radar',
+  data: {
+    labels: DATA.catLabels,
+    datasets: [
+      { label: '上位グループ平均', data: DATA.topAvg, borderColor: '#0f9960', backgroundColor: 'rgba(15,153,96,0.15)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#0f9960' },
+      { label: '全体平均', data: DATA.overall, borderColor: '#aaa', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,4], pointRadius: 2, pointBackgroundColor: '#aaa' }
+    ]
+  },
+  options: radarOpts()
+});
+
+// ── Radar: Low ──
+new Chart(document.getElementById('radarLow'), {
+  type: 'radar',
+  data: {
+    labels: DATA.catLabels,
+    datasets: [
+      { label: '要支援グループ平均', data: DATA.lowAvg, borderColor: '#e94560', backgroundColor: 'rgba(233,69,96,0.15)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#e94560' },
+      { label: '全体平均', data: DATA.overall, borderColor: '#aaa', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,4], pointRadius: 2, pointBackgroundColor: '#aaa' }
+    ]
+  },
+  options: radarOpts()
+});
+
+// ── Ranking Bars ──
+const rankEl = document.getElementById('rankingBars');
+DATA.unions.forEach((u, i) => {
+  const pct = (u.avg / 5 * 100).toFixed(1);
+  let color = '#0f9960';
+  if (u.avg < 3) color = '#e94560';
+  else if (u.avg < 4) color = '#d9822b';
+  else if (u.avg < 4.5) color = '#2b8cc4';
+  rankEl.innerHTML += `
+    <div class="rank-item">
+      <span class="rank-num">${i+1}</span>
+      <span class="rank-name">${u.name}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="rank-val" style="color:${color}">${u.avg.toFixed(2)}</span>
+    </div>`;
+});
+
+// ── Matrix Table ──
+const tbody = document.getElementById('matrixBody');
+DATA.unions.forEach(u => {
+  let row = `<td>${u.name}</td>`;
+  u.cats.forEach(v => {
+    let cls = v >= 4.5 ? 'score-high' : (v < 3 ? 'score-low' : (v < 3.5 ? 'score-mid' : ''));
+    row += `<td class="${cls}">${v.toFixed(2)}</td>`;
+  });
+  let cls = u.avg >= 4.5 ? 'score-high' : (u.avg < 3 ? 'score-low' : (u.avg < 3.5 ? 'score-mid' : ''));
+  row += `<td class="${cls}"><strong>${u.avg.toFixed(2)}</strong></td>`;
+  tbody.innerHTML += `<tr>${row}</tr>`;
+});
+
+// ── Top/Bottom Questions ──
+const topQ = document.getElementById('topQuestions');
+DATA.top5.forEach(q => {
+  topQ.innerHTML += `<li><span>${q.name}</span><span class="tag">${q.avg.toFixed(2)}</span></li>`;
+});
+const botQ = document.getElementById('bottomQuestions');
+DATA.bottom5.forEach(q => {
+  botQ.innerHTML += `<li><span>${q.name}</span><span class="tag">${q.avg.toFixed(2)}</span></li>`;
+});
+
+// ── Free Comments ──
+const fc = document.getElementById('freeComments');
+DATA.unions.forEach(u => {
+  if (u.comment && u.comment !== '特になし') {
+    fc.innerHTML += `<div class="fc-item"><span class="fc-name">${u.name}</span><span class="fc-text">${u.comment}</span></div>`;
+  }
+});
+</script>
+</body>
+</html>
