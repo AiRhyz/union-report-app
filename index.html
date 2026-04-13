@@ -1,415 +1,193 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>お好み焼き いし川 - お食事アンケート</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
-  background: #F3F3F3;
-  min-height: 100vh;
-  padding-bottom: 40px;
-  -webkit-text-size-adjust: 100%;
-}
-.header {
-  background: linear-gradient(135deg, #2EAE7B 0%, #238C62 100%);
-  padding: 32px 20px 28px;
-  text-align: center;
-  color: #fff;
-}
-.header-icon { font-size: 28px; margin-bottom: 4px; }
-.header-title { font-size: 22px; font-weight: 800; letter-spacing: 3px; }
-.header-desc { font-size: 13px; opacity: 0.85; margin-top: 8px; line-height: 1.7; }
-.container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
-.card {
-  background: #fff;
-  border-radius: 16px;
-  margin-top: 16px;
-  padding: 24px 20px 28px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-.card:first-child { margin-top: 20px; }
-.step-title {
-  color: #2EAE7B;
-  font-size: 17px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 18px;
-}
-/* Stars */
-.stars { display: flex; gap: 6px; justify-content: center; }
-.star-btn {
-  background: none; border: none; cursor: pointer;
-  font-size: 48px; color: #ccc; padding: 0; line-height: 1;
-  transition: color 0.15s, transform 0.15s;
-}
-.star-btn.active { color: #F5A623; transform: scale(1.12); }
-/* Chips */
-.chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.chip {
-  padding: 10px 20px; border-radius: 50px;
-  border: 2px solid #ddd; background: #fff; color: #444;
-  font-size: 15px; font-weight: 400; cursor: pointer;
-  transition: all 0.2s; white-space: nowrap;
-  font-family: inherit;
-}
-.chip.active {
-  border-color: #2EAE7B; background: #2EAE7B;
-  color: #fff; font-weight: 700;
-}
-/* Generate button */
-.gen-wrap { text-align: center; margin-bottom: 16px; }
-.gen-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 28px; border-radius: 50px; border: none;
-  background: linear-gradient(135deg, #2EAE7B, #238C62);
-  color: #fff; font-size: 15px; font-weight: 700;
-  cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 14px rgba(46,174,123,0.35);
-  transition: all 0.2s;
-}
-.gen-btn:disabled {
-  background: #ccc; box-shadow: none; cursor: default;
-}
-.gen-btn .spinner {
-  display: inline-block; width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff; border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.gen-hint { font-size: 12px; color: #999; margin-top: 8px; }
-/* Textarea */
-.review-box {
-  background: #FAFAFA; border-radius: 12px;
-  border: 1.5px solid #E8E8E8; overflow: hidden;
-}
-.review-box textarea {
-  width: 100%; min-height: 180px; padding: 16px;
-  border: none; background: transparent; font-size: 15px;
-  line-height: 1.8; font-family: inherit; resize: vertical;
-  outline: none; color: #333;
-}
-/* Copy button */
-.copy-wrap { text-align: center; margin-top: 16px; }
-.copy-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 28px; border-radius: 50px;
-  border: 2px solid #2EAE7B; background: #fff;
-  color: #2EAE7B; font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-}
-.copy-btn.copied { background: #E8F8F0; }
-/* Google button */
-.google-wrap { margin-top: 20px; text-align: center; }
-.google-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 10px; width: 100%; max-width: 400px; padding: 16px 24px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2EAE7B 0%, #238C62 100%);
-  color: #fff; font-size: 17px; font-weight: 700;
-  text-decoration: none; letter-spacing: 1px;
-  box-shadow: 0 6px 20px rgba(46,174,123,0.3);
-}
-.google-hint { font-size: 12px; color: #999; margin-top: 10px; line-height: 1.5; }
-.footer { text-align: center; margin-top: 32px; font-size: 12px; color: #bbb; }
-.hidden { display: none; }
-</style>
-</head>
-<body>
-
-<!-- ヘッダー -->
-<div class="header">
-  <div class="header-icon">🔥</div>
-  <div class="header-title">お好み焼き いし川</div>
-  <div class="header-desc">
-    いつもご利用いただきありがとうございます。<br>
-    【ご利用いただいた感想】をご記入頂ければ幸いです。<br>
-    ご協力よろしくお願いします。
-  </div>
-</div>
-
-<div class="container">
-
-  <!-- Step 1 -->
-  <div class="card">
-    <div class="step-title">Step 1: 満足度を星の数で選択ください</div>
-    <div class="stars" id="stars">
-      <button class="star-btn" data-value="1">★</button>
-      <button class="star-btn" data-value="2">★</button>
-      <button class="star-btn" data-value="3">★</button>
-      <button class="star-btn" data-value="4">★</button>
-      <button class="star-btn" data-value="5">★</button>
-    </div>
-  </div>
-
-  <!-- Step 2 -->
-  <div class="card">
-    <div class="step-title">Step 2: 評価ポイントを選択してください</div>
-    <div class="chips" id="chips"></div>
-  </div>
-
-  <!-- Step 3 -->
-  <div class="card">
-    <div class="step-title">Step 3: ご意見をお聞かせください</div>
-    <div class="gen-wrap">
-      <button class="gen-btn" id="genBtn" disabled>✨ AIで簡単に自動作成</button>
-      <div class="gen-hint" id="genHint">※ まずStep 1で星を選択してください</div>
-    </div>
-    <div class="review-box">
-      <textarea id="reviewText" placeholder="レビュー内容がここに表示されます。自由に編集もできます。"></textarea>
-    </div>
-    <div class="copy-wrap hidden" id="copyWrap">
-      <button class="copy-btn" id="copyBtn">📋 レビューをコピー</button>
-    </div>
-  </div>
-
-  <!-- Google投稿 -->
-  <div class="google-wrap hidden" id="googleWrap">
-    <a class="google-btn" id="googleBtn" href="https://maps.app.goo.gl/5VMvHDkA9mEWRirHA?g_st=ic" target="_blank" rel="noopener noreferrer">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-      </svg>
-      Googleで口コミを投稿する
-    </a>
-    <div class="google-hint">※ コピーしたレビューをGoogleの口コミ欄に貼り付けてください</div>
-  </div>
-
-  <div class="footer">ご協力ありがとうございました</div>
-</div>
-
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>お好み鉄板 いし川 - お食事アンケート</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f3f3f3;padding-bottom:32px}.h{background:linear-gradient(135deg,#2EAE7B,#238C62);padding:28px 16px 24px;text-align:center;color:#fff}.h h1{font-size:20px;letter-spacing:3px}.h p{font-size:12px;opacity:.85;margin-top:6px;line-height:1.7}.w{max-width:460px;margin:0 auto;padding:0 12px}.c{background:#fff;border-radius:14px;margin-top:14px;padding:20px 16px 24px;box-shadow:0 2px 10px rgba(0,0,0,.06)}.c:first-child{margin-top:20px}.st{color:#2EAE7B;font-size:15px;font-weight:700;text-align:center;margin-bottom:14px}.sr{display:flex;gap:4px;justify-content:center}.sb{background:none;border:none;cursor:pointer;font-size:44px;color:#ccc;padding:0;line-height:1;transition:.15s}.sb.a{color:#F5A623;transform:scale(1.1)}.ch{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.cp{padding:8px 16px;border-radius:50px;border:2px solid #ddd;background:#fff;color:#444;font-size:14px;cursor:pointer;transition:.2s;font-family:inherit}.cp.a{border-color:#2EAE7B;background:#2EAE7B;color:#fff;font-weight:700}.cl{width:100%;font-size:12px;color:#2EAE7B;font-weight:700;text-align:left;margin:12px 0 6px;padding-left:4px;letter-spacing:1px}.cl:first-child{margin-top:0}.gb{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,#2EAE7B,#238C62);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(46,174,123,.3);transition:.2s}.gb:disabled{background:#ccc;box-shadow:none}.ta{width:100%;min-height:150px;padding:14px;border:1.5px solid #e8e8e8;border-radius:10px;background:#fafafa;font-size:14px;line-height:1.8;font-family:inherit;resize:vertical;outline:none;color:#333}.cb{display:inline-flex;align-items:center;gap:5px;padding:8px 22px;border-radius:50px;border:2px solid #2EAE7B;background:#fff;color:#2EAE7B;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}.cb.ok{background:#E8F8F0}.gl{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border-radius:12px;background:linear-gradient(135deg,#2EAE7B,#238C62);color:#fff;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:1px;box-shadow:0 5px 16px rgba(46,174,123,.3)}.il{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border-radius:12px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:1px;box-shadow:0 5px 16px rgba(225,48,108,.25);margin-top:10px}.dn{display:none}.done{color:#2EAE7B;font-size:13px;font-weight:600;text-align:center;margin-top:8px}@keyframes sp{to{transform:rotate(360deg)}}.sn{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}</style></head><body><div class="h"><div style="font-size:24px;margin-bottom:2px">🔥</div><h1>お好み鉄板 いし川</h1><p>いつもご利用いただきありがとうございます。<br>【ご利用いただいた感想】をご記入頂ければ幸いです。<br>ご協力よろしくお願いします。</p></div><div class="w"><div class="c"><div class="st">Step 1: 満足度を星の数で選択ください</div><div class="sr" id="S"></div></div><div class="c"><div class="st">Step 2: 良かったポイントを選択してください</div><div id="C"></div></div><div class="c"><div class="st">Step 3: ご意見をお聞かせください</div><div style="text-align:center;margin-bottom:12px"><button class="gb" id="G" disabled>✨ AIで簡単に自動作成</button><div id="GH" style="font-size:11px;color:#999;margin-top:6px">※ まずStep 1で星を選択</div><div id="DM" class="done dn"></div></div><textarea class="ta" id="T" placeholder="レビュー内容がここに表示されます。自由に編集もできます。"></textarea><div style="text-align:center;margin-top:12px" class="dn" id="CW"><button class="cb" id="CB">📋 レビューをコピー</button></div></div><div style="margin-top:16px" class="dn" id="GW"><a class="gl" href="https://maps.app.goo.gl/PmNA2R4oM72fmRkM7?g_st=ic" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Googleで口コミを投稿する</a><div style="font-size:11px;color:#999;margin-top:6px;text-align:center">※ コピーしたレビューを貼り付けてください</div><a class="il" href="https://www.instagram.com/oko_tetsu_ishikawa?igsh=MWFmbWcwODZiZW9zbw==" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagramもフォローする</a></div><div style="text-align:center;margin-top:24px;font-size:11px;color:#bbb">ご協力ありがとうございました</div></div>
 <script>
-(function() {
-  // ── 設定 ──
-  var STORE_NAME = 'お好み焼き いし川';
-  var GOOGLE_REVIEW_URL = 'https://maps.app.goo.gl/5VMvHDkA9mEWRirHA?g_st=ic';
-
-  var EVAL_POINTS = [
-    'お好み焼き', 'もんじゃ焼き', '焼きそば',
-    '鉄板焼き', 'トッピング', 'ドリンク',
-    '接客', '雰囲気', '清潔感',
-    'コスパ', '焼き加減', 'ボリューム'
-  ];
-
-  var PHRASES = {
-    'お好み焼き': [
-      'お好み焼きがふわふわで絶品でした',
-      'お好み焼きの生地がふっくらしていて本当に美味しかったです',
-      'お好み焼きは外はカリッと中はふわっとで感動しました'
-    ],
-    'もんじゃ焼き': [
-      'もんじゃ焼きもトロトロで最高でした',
-      'もんじゃ焼きの味付けが絶妙で箸が止まりませんでした'
-    ],
-    '焼きそば': [
-      '焼きそばの麺がモチモチで美味しかったです',
-      '焼きそばはソースの香ばしさが最高でした'
-    ],
-    '鉄板焼き': [
-      '鉄板焼きのメニューも充実していて大満足です',
-      'アツアツの鉄板焼きが最高でした'
-    ],
-    'トッピング': [
-      'トッピングの種類が豊富で選ぶ楽しさがありました',
-      'トッピングが充実していて自分好みにカスタマイズできました'
-    ],
-    'ドリンク': [
-      'ドリンクメニューも充実していて食事と一緒に楽しめました',
-      'お酒の種類も豊富で鉄板料理との相性が抜群でした'
-    ],
-    '接客': [
-      'スタッフの方々がとても親切で気持ちよく過ごせました',
-      '接客が丁寧で、初めてでも安心して楽しめました'
-    ],
-    '雰囲気': [
-      '店内の雰囲気がとても良く、リラックスできる空間でした',
-      '落ち着いた雰囲気で居心地が良かったです'
-    ],
-    '清潔感': [
-      '店内がとても清潔で気持ちよく食事ができました',
-      'テーブルや鉄板もピカピカで清潔感がありました'
-    ],
-    'コスパ': [
-      'この品質でこの価格はコスパが良いと思います',
-      'ボリュームも味も大満足でコスパ最高です'
-    ],
-    '焼き加減': [
-      '焼き加減が絶妙で、プロの技を感じました',
-      '焼き加減が完璧で、さすがだなと思いました'
-    ],
-    'ボリューム': [
-      'ボリュームたっぷりでお腹いっぱいになりました',
-      '量もしっかりあって大満足でした'
-    ]
-  };
-
-  // ── 状態 ──
-  var currentStars = 0;
-  var selectedPoints = [];
-
-  // ── ユーティリティ ──
-  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-  function $(id) { return document.getElementById(id); }
-
-  // ── 星の初期化 ──
-  var starBtns = document.querySelectorAll('.star-btn');
-  starBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      currentStars = parseInt(this.getAttribute('data-value'));
-      updateStars();
-      $('reviewText').value = '';
-      $('copyWrap').classList.add('hidden');
-      $('googleWrap').classList.add('hidden');
-      $('genBtn').disabled = false;
-      $('genHint').classList.add('hidden');
-    });
+var N='お好み鉄板 いし川',
+CATS=[
+{label:'🍳 コース料理',items:['煮込み料理','季節の野菜料理','鉄板料理','肉料理','卵料理','箸休めの一品','広島お好み焼き','デザート']},
+{label:'🐟 食材・素材',items:['旬の食材','地元群馬の野菜','瀬戸内の魚介','お肉の質']},
+{label:'🔥 鉄板LIVE感',items:['目の前で焼く臨場感','焼き加減','盛り付け・見た目','香り・音の演出']},
+{label:'🍺 ドリンク',items:['ドリンクの品揃え','料理との相性']},
+{label:'😊 接客・サービス',items:['店主の人柄','接客・気配り','料理の説明','予約のしやすさ']},
+{label:'✨ お店の雰囲気',items:['非日常感・特別感','居心地の良さ','清潔感','カウンターの距離感']},
+{label:'💰 総合',items:['コスパ','ボリューム','記念日・デート利用','また来たい']}
+],
+s=0,sp=[];
+function $(i){return document.getElementById(i)}
+var SE=$('S');for(var i=1;i<=5;i++){var b=document.createElement('button');b.className='sb';b.textContent='★';b.dataset.v=i;b.onclick=function(){s=+this.dataset.v;SE.querySelectorAll('.sb').forEach(function(x,j){x.classList.toggle('a',j<s)});$('T').value='';$('CW').classList.add('dn');$('GW').classList.add('dn');$('G').disabled=false;$('GH').classList.add('dn');$('DM').classList.add('dn')};SE.appendChild(b)}
+var CE=$('C');
+CATS.forEach(function(cat){
+  var lbl=document.createElement('div');lbl.className='cl';lbl.textContent=cat.label;CE.appendChild(lbl);
+  var wrap=document.createElement('div');wrap.className='ch';
+  cat.items.forEach(function(p){
+    var b=document.createElement('button');b.className='cp';b.textContent=p;
+    b.onclick=function(){var i=sp.indexOf(p);if(i>=0){sp.splice(i,1);this.classList.remove('a')}else{sp.push(p);this.classList.add('a')}$('T').value='';$('CW').classList.add('dn');$('GW').classList.add('dn');$('DM').classList.add('dn')};
+    wrap.appendChild(b);
   });
+  CE.appendChild(wrap);
+});
 
-  function updateStars() {
-    starBtns.forEach(function(btn) {
-      var v = parseInt(btn.getAttribute('data-value'));
-      if (v <= currentStars) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-  }
+async function generateWithAI(){
+if(!s)return;
+var btn=$('G');btn.disabled=true;btn.innerHTML='<span class="sn"></span> AIが考え中...';$('DM').classList.add('dn');
+var starLabel=['','★1（不満）','★2（やや不満）','★3（普通）','★4（満足）','★5（大満足）'][s];
+var pointsText=sp.length>0?sp.join('、'):'特になし';
+var prompt='あなたはGoogle口コミのレビュー代筆アシスタントです。以下の条件で「'+N+'」のGoogleマップ口コミレビューを1件だけ書いてください。\n\n【お店の特徴】\n- 群馬県にある完全予約制のお好み焼き・鉄板焼き店\n- 店主は広島出身。瀬戸内海から魚介を直送し、群馬の地元野菜も活用\n- コース料理（煮込み→季節の野菜→鉄板料理→肉→箸休め→広島お好み焼き→デザート）\n- カウンター越しに店主が目の前で調理するLIVE感が魅力\n- 「旬なものを旬な時期に食べる事が一番の贅沢」がコンセプト\n\n【条件】\n- 満足度: '+starLabel+'\n- 良かったポイント: '+pointsText+'\n- 文体: 一般のお客様が書いたような自然な口コミ（150〜300文字程度）\n- 「店主」という表現OK（「大将」は使わない）\n- 毎回異なる書き出し・構成・表現にすること\n- 絵文字は使わない\n- 予約制であることを自然に触れてよい\n- レビュー本文のみ出力（説明や前置き不要）';
+var usedAI=false;
+try{
+var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+var data=await res.json();var text='';
+if(data.content){data.content.forEach(function(block){if(block.type==='text')text+=block.text})}
+if(text&&text.trim().length>30){$('T').value=text.trim();usedAI=true}else{throw new Error('empty')}
+}catch(e){$('T').value=localGenerate()}
+$('CW').classList.remove('dn');$('GW').classList.remove('dn');
+$('DM').textContent=usedAI?'✓ 完了':'✓ 完了しました';$('DM').classList.remove('dn');
+btn.disabled=false;btn.innerHTML='✨ AIで簡単に自動作成';
+}
 
-  // ── チップ初期化 ──
-  var chipsEl = $('chips');
-  EVAL_POINTS.forEach(function(point) {
-    var btn = document.createElement('button');
-    btn.className = 'chip';
-    btn.textContent = point;
-    btn.setAttribute('data-point', point);
-    btn.addEventListener('click', function() {
-      var idx = selectedPoints.indexOf(point);
-      if (idx >= 0) {
-        selectedPoints.splice(idx, 1);
-        this.classList.remove('active');
-      } else {
-        selectedPoints.push(point);
-        this.classList.add('active');
-      }
-      $('reviewText').value = '';
-      $('copyWrap').classList.add('hidden');
-      $('googleWrap').classList.add('hidden');
-    });
-    chipsEl.appendChild(btn);
-  });
+function localGenerate(){
+var pk=function(a){return a[Math.floor(Math.random()*a.length)]};
+var F={
+'煮込み料理':['最初に出てきた煮込み料理から期待を超える美味しさでした','じっくり煮込まれた一品目から心を掴まれました','コースの始まりの煮込みが丁寧に仕上げられていて感動しました','トロトロに煮込まれた一品がコースの幕開けにぴったりでした','煮込み料理の深い味わいに最初から引き込まれました'],
+'季節の野菜料理':['季節の野菜が素材そのままの甘みで驚きました','地元の旬の野菜を活かした料理が印象的でした','野菜料理がこんなに美味しいと思ったのは初めてです','群馬の新鮮な野菜の味が鉄板で引き出されていて絶品でした','季節の野菜が主役になる料理に店主のこだわりを感じました'],
+'鉄板料理':['鉄板料理はどれも焼き加減が絶妙で感動しました','いし川限定の鉄板料理は他では味わえない逸品でした','鉄板から立ち上る香りだけで幸せな気持ちになりました','鉄板で一品ずつ丁寧に焼き上げる姿に職人技を感じました','目の前で仕上がる鉄板料理のライブ感が最高でした'],
+'肉料理':['肉料理は火入れが完璧で旨味がしっかり閉じ込められていました','お肉の質が良く鉄板で焼かれることで更に美味しくなっていました','肉料理のジューシーさに思わず唸りました','絶妙な焼き加減のお肉は口の中でとろけるようでした','コースの肉料理がメインの満足感をしっかり与えてくれました'],
+'卵料理':['鉄板で作る卵料理がふわとろで絶品でした','卵料理のシンプルなのに奥深い味わいに驚きました','鉄板卵料理は見た目も美しくて食べるのがもったいないくらいでした','卵のとろとろ食感が鉄板ならではの仕上がりで感動です','卵料理一つとっても丁寧な仕事ぶりが伝わってきました'],
+'箸休めの一品':['箸休めの一品にもこだわりが感じられて嬉しかったです','コースの合間に出てくる箸休めが絶妙なタイミングでした','箸休めまで手を抜かない姿勢に感動しました','さりげない箸休めが次の料理への期待を高めてくれました','小さな一品にも丁寧さが光っていて全体の満足度が上がりました'],
+'広島お好み焼き':['締めの広島お好み焼きが本場の味で感動しました','コースの最後に出てくる広島お好み焼きが最高のフィナーレでした','広島出身の店主が焼くお好み焼きは別格の美味しさです','本場仕込みの広島お好み焼きにコース全体の満足度が更に上がりました','鉄板で焼かれる広島お好み焼きの香ばしさがたまりませんでした','キャベツの甘みと麺のパリッと感が絶妙な広島お好み焼きでした','コースの最後にこの広島お好み焼きが出てくるのは最高の構成です','店主が目の前で仕上げる広島お好み焼きは圧巻でした'],
+'デザート':['締めのデザートまで手作り感があって幸せな気持ちになりました','最後のデザートまで美味しくて完璧なコースでした','デザートがコース全体の余韻を美しく締めくくってくれました','甘さ控えめのデザートが食事の後にちょうど良かったです','デザートまで抜かりない構成に感服しました'],
+'旬の食材':['旬の食材を使ったコースは季節を感じられて贅沢でした','その時期にしか食べられない食材を楽しめるのが魅力です','旬の素材の力を最大限に引き出す料理に感動しました','季節ごとに変わるメニューが毎回の楽しみになりそうです','旬を大切にする店主の哲学がコース全体から伝わってきました'],
+'地元群馬の野菜':['群馬の野菜がこんなに美味しいとは知りませんでした','地元群馬の新鮮な野菜が鉄板で更に甘くなっていました','地産地消へのこだわりが感じられて好感が持てました','群馬の野菜の力強い味わいに驚かされました','産地にこだわった野菜の味は一口で違いがわかりました'],
+'瀬戸内の魚介':['瀬戸内から直送される魚介の鮮度が抜群でした','海なし県で味わう瀬戸内の魚介という意外性に感動です','瀬戸内直送の魚が鉄板で焼かれると香りが最高でした','群馬にいながら瀬戸内の海の幸を楽しめる贅沢な体験でした','魚介の鮮度の良さが鉄板で焼くことで更に際立っていました'],
+'お肉の質':['使っているお肉の質が良く焼くだけで十分美味しかったです','素材の良さが伝わる上質なお肉でした','お肉の旨味が鉄板の上で最大限に引き出されていました','お肉一つとっても妥協しない仕入れの姿勢を感じました','上質なお肉を最高の焼き加減で味わえる幸せを感じました'],
+'目の前で焼く臨場感':['目の前で調理してくれるライブ感が最高でした','カウンター越しに店主の技を見られるのが楽しかったです','料理が出来上がる過程を見られるのは非日常感があって素敵です','鉄板で焼く音と香りに五感が刺激されっぱなしでした','店主の手さばきを間近で見られるのはカウンター席ならではの特権です'],
+'焼き加減':['焼き加減が絶妙でプロの技を感じました','焼き加減が完璧でさすがだと思いました','絶妙な火加減で素材の旨味が最大限に引き出されていました','外はパリッと中はふんわりの焼き加減は職人技です','焼き加減のこだわりが伝わってきて一口目から感動しました'],
+'盛り付け・見た目':['盛り付けが美しくて食べるのがもったいないくらいでした','見た目にもこだわった一皿一皿に芸術性を感じました','鉄板料理なのに盛り付けが繊細で驚きました','彩り豊かな盛り付けに目でも楽しめるコースでした','料理の見た目の美しさにテンションが上がりました'],
+'香り・音の演出':['鉄板のジュージューという音が食欲をそそりました','ソースやバターの香りが広がる瞬間がたまりませんでした','鉄板の音と香りが最高の演出になっていました','五感で楽しめる食体験ができました','料理の香りと鉄板の音が店内に広がるたびにワクワクしました'],
+'ドリンクの品揃え':['ドリンクの品揃えが良く料理に合わせて楽しめました','お酒の種類が豊富でコースに合わせて選ぶ楽しさがありました','ワインやビールなど鉄板料理に合うドリンクが揃っていました','日本酒のラインナップが充実していて嬉しかったです','料理に合わせたドリンクの提案も的確でした'],
+'料理との相性':['おすすめのお酒が料理との相性抜群でした','コースに合わせたペアリングが楽しめて大満足でした','料理ごとに違うお酒を合わせる楽しさを教えてもらえました','鉄板料理とお酒のマリアージュが最高でした','店主が料理に合うお酒を提案してくれて感動しました'],
+'店主の人柄':['店主の人柄が素晴らしく食事が更に楽しくなりました','温かい人柄の店主との会話が料理を引き立ててくれました','店主の食材への情熱が会話の端々から伝わってきました','気さくな店主のおかげで初来店でもリラックスできました','店主の料理に対する真摯な姿勢に感動しました'],
+'接客・気配り':['さりげない気配りが心地よく終始リラックスできました','細やかな接客でおもてなしの心を感じました','料理のタイミングや温度管理まで行き届いた接客でした','心のこもったおもてなしで特別な時間を過ごせました','一人一人に丁寧に向き合ってくれる接客に感動しました'],
+'料理の説明':['一皿ごとに丁寧な説明があり料理への理解が深まりました','食材の産地やこだわりを教えてもらえて食事が楽しくなりました','料理の説明が分かりやすく興味深かったです','コースの一品一品に込められた想いを聞けたのが嬉しかったです','説明を聞くと料理の味わいが何倍にも深くなりました'],
+'予約のしやすさ':['予約もスムーズにでき当日も安心して来店できました','電話での予約対応がとても丁寧で好印象でした','予約が必要ですがその分しっかり準備してくれている安心感があります','予約制なのでゆったりと食事を楽しめる環境が保たれていました','予約のやり取りから丁寧さが伝わってきて来店が楽しみになりました'],
+'非日常感・特別感':['日常を忘れられる特別な食体験ができました','カウンターで味わうコースは非日常感があって最高でした','特別な日に利用したいと思えるお店です','記念日にふさわしい特別な空間と料理でした','いつもとは違う贅沢な時間を過ごすことができました'],
+'居心地の良さ':['居心地が良くて時間を忘れて過ごしてしまいました','落ち着いた空間でゆったりと食事を楽しめました','アットホームながらも上質な居心地の良さがありました','肩肘張らず楽しめるリラックスした空間でした','カウンターの適度な距離感が心地よかったです'],
+'清潔感':['店内が清潔で気持ちよく食事できました','鉄板もカウンターもピカピカで清潔感がありました','隅々まで手入れが行き届いていて安心して過ごせました','厨房も含めてとても清潔で信頼できるお店です','細部まで清潔に保たれていて好印象でした'],
+'カウンターの距離感':['カウンター越しに店主との距離が近く特別感がありました','カウンター席から鉄板を囲む一体感が心地よかったです','目の前で調理する様子が見える最高の席でした','カウンターならではの臨場感と親密さが素敵でした','席と鉄板の距離感がちょうど良く料理を五感で楽しめました'],
+'コスパ':['この内容でこの価格は素晴らしいコスパだと思います','コース全体の満足度を考えるとコスパ抜群です','これだけのクオリティの料理をこの価格で楽しめるのは嬉しいです','食材のクオリティと料理の完成度を考えると大変お得です','値段以上の価値がある食体験ができました'],
+'ボリューム':['コース全体のボリュームがちょうど良く最後まで楽しめました','品数も量もしっかりあって大満足のコースでした','一品一品は上品なサイズですがコース通して満足感がありました','お腹いっぱいになるボリュームで帰りは幸せな気持ちでした','コースのボリューム配分が絶妙で最後まで美味しく食べられました'],
+'記念日・デート利用':['記念日のディナーにぴったりの素敵なお店でした','デートで利用しましたがパートナーも大満足でした','特別な日に利用したい心に残る食体験ができました','大切な人との時間を過ごすのに最高のお店です','誕生日に利用しましたが忘れられない思い出になりました'],
+'また来たい':['絶対にまた来たいと思えるお店でした','帰り道にはもう次の予約を考えていました','また季節が変わったら訪れたいと思います','リピート確定の素晴らしいお店に出会えました','何度でも通いたくなる魅力のあるお店です']
+};
+var o=[
+N+'さんに伺いました。',
+'予約して伺った'+N+'さん。期待以上でした。',
+'前から気になっていた'+N+'さんにようやく予約が取れて訪問。',
+'友人に勧められて'+N+'さんを予約しました。',
+'記念日のディナーに'+N+'さんを選びました。',
+'地元で評判の'+N+'さんに行ってきました。',
+'予約制と聞いて気になっていた'+N+'さんにやっと来店できました。',
+'特別な日にと思い'+N+'さんを予約しました。',
+'ずっと行ってみたかった'+N+'さんにようやく訪問。',
+N+'さんのコースをいただきました。',
+'口コミを見て気になっていた'+N+'さんを予約。',
+'知人の紹介で'+N+'さんに伺いました。',
+'パートナーの誕生日に'+N+'さんを予約しました。',
+'久しぶりに贅沢をしようと'+N+'さんへ。',
+'初めての来店でしたが'+N+'さんは期待を超えるお店でした。',
+'カウンターの鉄板焼きが気になって'+N+'さんを予約しました。',
+'広島のお好み焼きが食べられると聞いて'+N+'さんへ。',
+'群馬の食材と鉄板の組み合わせに惹かれて'+N+'さんに来ました。',
+'特別な夜を過ごしたくて'+N+'さんを選びました。',
+'週末のご褒美ディナーに'+N+'さんへ伺いました。'
+];
+var c5=[
+'また必ず予約します。最高のお店です！',
+'リピート確定です。次の予約が楽しみです！',
+'大切な人を連れてまた来たい最高のお店です！',
+'こんな素敵なお店に出会えて幸せです。また伺います！',
+'季節が変わったらまた予約したいと思います！',
+'文句なしの満点です。自信を持っておすすめします！',
+'忘れられない食体験でした。すぐにでもまた行きたいです！',
+'帰り道にもう次の来店を考えてしまうほど素晴らしかったです！',
+'人生で出会えて良かったと思えるお店でした！',
+'全力でおすすめしたいお店です。ぜひ予約して行ってみてください！',
+'店主の料理と人柄に惚れました。通わせていただきます！',
+'何度でも通いたくなる特別なお店に出会えました！',
+'これからの常連入り確定です。ごちそうさまでした！',
+'最高のコース体験でした。また絶対に伺います！',
+'五感で楽しめる食事とはまさにこのことでした！',
+'予約制なのも納得の、丁寧で心のこもったコースでした！',
+'旬が変わるたびに訪れたくなるお店です！',
+'特別な日にも日常の贅沢にも使いたいお店です！',
+'群馬にこんな素晴らしいお店があるとは驚きです！',
+'お店を出た瞬間から次の予約のことを考えていました！'
+];
+var c4=[
+'とても良いお店です。また予約して伺いたいと思います。',
+'満足度の高いコースでした。おすすめです。',
+'料理も雰囲気も良い素敵なお店です。',
+'また近いうちに再訪したいと思います。',
+'友人にもおすすめしたい良いお店でした。',
+'丁寧に作られたコースに好感が持てました。',
+'安心して通えるいいお店だと思います。',
+'いい時間を過ごせました。また利用させていただきます。',
+'コース全体の満足度が高くまた行きたくなるお店です。',
+'予約して良かったと思えるお店でした。',
+'次は違う季節に来てみたいです。',
+'食材へのこだわりが感じられる良いお店でした。',
+'地元の隠れ家的な良店だと思います。',
+'しっかり満足させてもらいました。また伺います。',
+'気取らず楽しめるいいお店を見つけました。',
+'家族みんなが喜んでいたのでまた連れて行きたいです。',
+'鉄板焼きの新しい楽しみ方を教えてもらいました。',
+'次の来店が今から楽しみです。',
+'リーズナブルで美味しくて言うことなしでした。',
+'大切な人と来たい素敵なお店でした。'
+];
+var c3=[
+'全体的に良いお店だと思います。また機会があれば伺います。',
+'気になるメニューもあったので次回も楽しみです。',
+'コース内容は充実していたと思います。',
+'予約制ならではの落ち着いた食事ができました。',
+'また季節を変えて来てみたいと思います。',
+'雰囲気の良いお店なのでまた利用したいです。',
+'全体的にバランスの取れたコースだと思いました。',
+'次回はまた違うコースも試してみたいです。',
+'鉄板焼きが好きな方にはおすすめのお店です。',
+'落ち着いて食事ができる良いお店でした。'
+];
+var pattern=Math.floor(Math.random()*5);
+var t=[];
+if(pattern===0){
+  t.push(pk(o));
+  if(sp.length>0){var ph=[];sp.forEach(function(p){if(F[p])ph.push(pk(F[p]))});t.push(ph.join('。')+'。')}
+  else t.push('コース全体を通して旬の素材を活かした丁寧な料理が楽しめました。締めの広島お好み焼きも絶品です。');
+  t.push(s>=5?pk(c5):s>=4?pk(c4):pk(c3));
+}else if(pattern===1){
+  t.push(pk(o));
+  if(sp.length>0){var ph=[];sp.forEach(function(p){if(F[p])ph.push(pk(F[p]))});var half=Math.ceil(ph.length/2);t.push(ph.slice(0,half).join('。')+'。');if(ph.length>1)t.push(ph.slice(half).join('。')+'。')}
+  else t.push('煮込みから始まり鉄板料理、広島お好み焼きまで、どの一皿も丁寧に作られていて感動しました。');
+  t.push(s>=5?pk(c5):s>=4?pk(c4):pk(c3));
+}else if(pattern===2){
+  if(sp.length>0){var ph=[];sp.forEach(function(p){if(F[p])ph.push(pk(F[p]))});t.push(ph.join('。')+'。')}
+  else t.push('目の前の鉄板で仕上がるコース料理はどれも絶品でした。');
+  t.push(pk(o).replace('。','')+'のですが、期待以上の素晴らしいお店でした。');
+  t.push(s>=5?pk(c5):s>=4?pk(c4):pk(c3));
+}else if(pattern===3){
+  t.push(pk(o));
+  if(sp.length>0){var top=sp.slice(0,3);t.push('特に印象的だったのは'+top.join('と')+'です。');var ph=[];sp.forEach(function(p){if(F[p])ph.push(pk(F[p]))});t.push(ph.slice(0,3).join('。')+'。')}
+  else t.push('コース全体の構成が素晴らしく、一品一品に店主のこだわりが感じられました。特に締めの広島お好み焼きは本場の味で感動しました。');
+  t.push(s>=5?pk(c5):s>=4?pk(c4):pk(c3));
+}else{
+  t.push(pk(o));
+  t.push(s>=5?'結論から言うと大満足のコースでした！':'コース全体を通して満足できる内容でした。');
+  if(sp.length>0){var ph=[];sp.forEach(function(p){if(F[p])ph.push(pk(F[p]))});t.push(ph.join('。')+'。')}
+  else t.push('旬の食材を活かした鉄板料理は、どれも素材の力を感じる味わいでした。目の前で仕上げてくれるライブ感も楽しめます。');
+  t.push(s>=5?pk(c5):s>=4?pk(c4):pk(c3));
+}
+return t.join('\n\n');
+}
 
-  // ── レビュー生成 ──
-  function generateReview() {
-    var openings = [
-      STORE_NAME + 'さんに伺いました。',
-      '友人に勧められて' + STORE_NAME + 'さんへ。',
-      '前から気になっていた' + STORE_NAME + 'さんに初訪問。',
-      '地元で人気の' + STORE_NAME + 'さんに行ってきました。'
-    ];
-    var closings5 = [
-      'また必ず来ます！大満足です！',
-      'リピート確定です。本当におすすめです！',
-      '友人にも自信を持っておすすめできるお店です！',
-      '最高のお好み焼き体験でした。また伺います！'
-    ];
-    var closings4 = [
-      'とても良いお店です。また伺いたいと思います。',
-      '満足度の高いお食事でした。おすすめです。',
-      '美味しくて雰囲気も良い、素敵なお店です。'
-    ];
-    var closings3 = [
-      '全体的に良いお店だと思います。また機会があれば伺います。',
-      '気軽に楽しめるお店です。'
-    ];
-
-    var parts = [];
-    parts.push(pick(openings));
-
-    if (selectedPoints.length > 0) {
-      var phrases = [];
-      selectedPoints.forEach(function(p) {
-        if (PHRASES[p]) phrases.push(pick(PHRASES[p]));
-      });
-      parts.push(phrases.join('。') + '。');
-    } else {
-      parts.push('料理も接客もとても良く、楽しい時間を過ごせました。');
-    }
-
-    if (currentStars === 5) parts.push(pick(closings5));
-    else if (currentStars === 4) parts.push(pick(closings4));
-    else parts.push(pick(closings3));
-
-    return parts.join('\n\n');
-  }
-
-  // ── 生成ボタン ──
-  $('genBtn').addEventListener('click', function() {
-    if (currentStars === 0) return;
-    var btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> 生成中...';
-    setTimeout(function() {
-      $('reviewText').value = generateReview();
-      btn.disabled = false;
-      btn.innerHTML = '✨ AIで簡単に自動作成';
-      $('copyWrap').classList.remove('hidden');
-      $('googleWrap').classList.remove('hidden');
-    }, 600);
-  });
-
-  // ── コピーボタン ──
-  $('copyBtn').addEventListener('click', function() {
-    var text = $('reviewText').value;
-    if (!text) return;
-    var btn = this;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(function() {
-        btn.textContent = '✓ コピーしました！';
-        btn.classList.add('copied');
-        setTimeout(function() {
-          btn.textContent = '📋 レビューをコピー';
-          btn.classList.remove('copied');
-        }, 2500);
-      });
-    } else {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      btn.textContent = '✓ コピーしました！';
-      btn.classList.add('copied');
-      setTimeout(function() {
-        btn.textContent = '📋 レビューをコピー';
-        btn.classList.remove('copied');
-      }, 2500);
-    }
-  });
-
-  // ── テキスト編集時 ──
-  $('reviewText').addEventListener('input', function() {
-    if (this.value) {
-      $('copyWrap').classList.remove('hidden');
-      $('googleWrap').classList.remove('hidden');
-    } else {
-      $('copyWrap').classList.add('hidden');
-      $('googleWrap').classList.add('hidden');
-    }
-  });
-
-  // ── GoogleリンクURL設定 ──
-  $('googleBtn').href = GOOGLE_REVIEW_URL;
-
-})();
-</script>
-</body>
-</html>
+$('G').onclick=generateWithAI;
+$('CB').onclick=function(){var t=$('T').value,b=this;if(!t)return;try{navigator.clipboard.writeText(t)}catch(e){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a)}b.textContent='✓ コピーしました！';b.classList.add('ok');setTimeout(function(){b.textContent='📋 レビューをコピー';b.classList.remove('ok')},2e3)};
+$('T').oninput=function(){var v=this.value;$('CW').classList.toggle('dn',!v);$('GW').classList.toggle('dn',!v)}
+</script></body></html>
