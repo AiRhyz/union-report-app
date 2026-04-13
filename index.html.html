@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>お好み焼き いし川 - お食事アンケート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  background: #F3F3F3;
+  min-height: 100vh;
+  padding-bottom: 40px;
+  -webkit-text-size-adjust: 100%;
+}
+.header {
+  background: linear-gradient(135deg, #2EAE7B 0%, #238C62 100%);
+  padding: 32px 20px 28px;
+  text-align: center;
+  color: #fff;
+}
+.header-icon { font-size: 28px; margin-bottom: 4px; }
+.header-title { font-size: 22px; font-weight: 800; letter-spacing: 3px; }
+.header-desc { font-size: 13px; opacity: 0.85; margin-top: 8px; line-height: 1.7; }
+.container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+.card {
+  background: #fff;
+  border-radius: 16px;
+  margin-top: 16px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.card:first-child { margin-top: 20px; }
+.step-title {
+  color: #2EAE7B;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 18px;
+}
+/* Stars */
+.stars { display: flex; gap: 6px; justify-content: center; }
+.star-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 48px; color: #ccc; padding: 0; line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+.star-btn.active { color: #F5A623; transform: scale(1.12); }
+/* Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chip {
+  padding: 10px 20px; border-radius: 50px;
+  border: 2px solid #ddd; background: #fff; color: #444;
+  font-size: 15px; font-weight: 400; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+  font-family: inherit;
+}
+.chip.active {
+  border-color: #2EAE7B; background: #2EAE7B;
+  color: #fff; font-weight: 700;
+}
+/* Generate button */
+.gen-wrap { text-align: center; margin-bottom: 16px; }
+.gen-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, #2EAE7B, #238C62);
+  color: #fff; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 14px rgba(46,174,123,0.35);
+  transition: all 0.2s;
+}
+.gen-btn:disabled {
+  background: #ccc; box-shadow: none; cursor: default;
+}
+.gen-btn .spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-hint { font-size: 12px; color: #999; margin-top: 8px; }
+/* Textarea */
+.review-box {
+  background: #FAFAFA; border-radius: 12px;
+  border: 1.5px solid #E8E8E8; overflow: hidden;
+}
+.review-box textarea {
+  width: 100%; min-height: 180px; padding: 16px;
+  border: none; background: transparent; font-size: 15px;
+  line-height: 1.8; font-family: inherit; resize: vertical;
+  outline: none; color: #333;
+}
+/* Copy button */
+.copy-wrap { text-align: center; margin-top: 16px; }
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 28px; border-radius: 50px;
+  border: 2px solid #2EAE7B; background: #fff;
+  color: #2EAE7B; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.copy-btn.copied { background: #E8F8F0; }
+/* Google button */
+.google-wrap { margin-top: 20px; text-align: center; }
+.google-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 10px; width: 100%; max-width: 400px; padding: 16px 24px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2EAE7B 0%, #238C62 100%);
+  color: #fff; font-size: 17px; font-weight: 700;
+  text-decoration: none; letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(46,174,123,0.3);
+}
+.google-hint { font-size: 12px; color: #999; margin-top: 10px; line-height: 1.5; }
+.footer { text-align: center; margin-top: 32px; font-size: 12px; color: #bbb; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-icon">🔥</div>
+  <div class="header-title">お好み焼き いし川</div>
+  <div class="header-desc">
+    いつもご利用いただきありがとうございます。<br>
+    【ご利用いただいた感想】をご記入頂ければ幸いです。<br>
+    ご協力よろしくお願いします。
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="step-title">Step 1: 満足度を星の数で選択ください</div>
+    <div class="stars" id="stars">
+      <button class="star-btn" data-value="1">★</button>
+      <button class="star-btn" data-value="2">★</button>
+      <button class="star-btn" data-value="3">★</button>
+      <button class="star-btn" data-value="4">★</button>
+      <button class="star-btn" data-value="5">★</button>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div class="step-title">Step 2: 評価ポイントを選択してください</div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div class="step-title">Step 3: ご意見をお聞かせください</div>
+    <div class="gen-wrap">
+      <button class="gen-btn" id="genBtn" disabled>✨ AIで簡単に自動作成</button>
+      <div class="gen-hint" id="genHint">※ まずStep 1で星を選択してください</div>
+    </div>
+    <div class="review-box">
+      <textarea id="reviewText" placeholder="レビュー内容がここに表示されます。自由に編集もできます。"></textarea>
+    </div>
+    <div class="copy-wrap hidden" id="copyWrap">
+      <button class="copy-btn" id="copyBtn">📋 レビューをコピー</button>
+    </div>
+  </div>
+
+  <!-- Google投稿 -->
+  <div class="google-wrap hidden" id="googleWrap">
+    <a class="google-btn" id="googleBtn" href="https://maps.app.goo.gl/5VMvHDkA9mEWRirHA?g_st=ic" target="_blank" rel="noopener noreferrer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Googleで口コミを投稿する
+    </a>
+    <div class="google-hint">※ コピーしたレビューをGoogleの口コミ欄に貼り付けてください</div>
+  </div>
+
+  <div class="footer">ご協力ありがとうございました</div>
+</div>
+
+<script>
+(function() {
+  // ── 設定 ──
+  var STORE_NAME = 'お好み焼き いし川';
+  var GOOGLE_REVIEW_URL = 'https://maps.app.goo.gl/5VMvHDkA9mEWRirHA?g_st=ic';
+
+  var EVAL_POINTS = [
+    'お好み焼き', 'もんじゃ焼き', '焼きそば',
+    '鉄板焼き', 'トッピング', 'ドリンク',
+    '接客', '雰囲気', '清潔感',
+    'コスパ', '焼き加減', 'ボリューム'
+  ];
+
+  var PHRASES = {
+    'お好み焼き': [
+      'お好み焼きがふわふわで絶品でした',
+      'お好み焼きの生地がふっくらしていて本当に美味しかったです',
+      'お好み焼きは外はカリッと中はふわっとで感動しました'
+    ],
+    'もんじゃ焼き': [
+      'もんじゃ焼きもトロトロで最高でした',
+      'もんじゃ焼きの味付けが絶妙で箸が止まりませんでした'
+    ],
+    '焼きそば': [
+      '焼きそばの麺がモチモチで美味しかったです',
+      '焼きそばはソースの香ばしさが最高でした'
+    ],
+    '鉄板焼き': [
+      '鉄板焼きのメニューも充実していて大満足です',
+      'アツアツの鉄板焼きが最高でした'
+    ],
+    'トッピング': [
+      'トッピングの種類が豊富で選ぶ楽しさがありました',
+      'トッピングが充実していて自分好みにカスタマイズできました'
+    ],
+    'ドリンク': [
+      'ドリンクメニューも充実していて食事と一緒に楽しめました',
+      'お酒の種類も豊富で鉄板料理との相性が抜群でした'
+    ],
+    '接客': [
+      'スタッフの方々がとても親切で気持ちよく過ごせました',
+      '接客が丁寧で、初めてでも安心して楽しめました'
+    ],
+    '雰囲気': [
+      '店内の雰囲気がとても良く、リラックスできる空間でした',
+      '落ち着いた雰囲気で居心地が良かったです'
+    ],
+    '清潔感': [
+      '店内がとても清潔で気持ちよく食事ができました',
+      'テーブルや鉄板もピカピカで清潔感がありました'
+    ],
+    'コスパ': [
+      'この品質でこの価格はコスパが良いと思います',
+      'ボリュームも味も大満足でコスパ最高です'
+    ],
+    '焼き加減': [
+      '焼き加減が絶妙で、プロの技を感じました',
+      '焼き加減が完璧で、さすがだなと思いました'
+    ],
+    'ボリューム': [
+      'ボリュームたっぷりでお腹いっぱいになりました',
+      '量もしっかりあって大満足でした'
+    ]
+  };
+
+  // ── 状態 ──
+  var currentStars = 0;
+  var selectedPoints = [];
+
+  // ── ユーティリティ ──
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function $(id) { return document.getElementById(id); }
+
+  // ── 星の初期化 ──
+  var starBtns = document.querySelectorAll('.star-btn');
+  starBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentStars = parseInt(this.getAttribute('data-value'));
+      updateStars();
+      $('reviewText').value = '';
+      $('copyWrap').classList.add('hidden');
+      $('googleWrap').classList.add('hidden');
+      $('genBtn').disabled = false;
+      $('genHint').classList.add('hidden');
+    });
+  });
+
+  function updateStars() {
+    starBtns.forEach(function(btn) {
+      var v = parseInt(btn.getAttribute('data-value'));
+      if (v <= currentStars) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  // ── チップ初期化 ──
+  var chipsEl = $('chips');
+  EVAL_POINTS.forEach(function(point) {
+    var btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = point;
+    btn.setAttribute('data-point', point);
+    btn.addEventListener('click', function() {
+      var idx = selectedPoints.indexOf(point);
+      if (idx >= 0) {
+        selectedPoints.splice(idx, 1);
+        this.classList.remove('active');
+      } else {
+        selectedPoints.push(point);
+        this.classList.add('active');
+      }
+      $('reviewText').value = '';
+      $('copyWrap').classList.add('hidden');
+      $('googleWrap').classList.add('hidden');
+    });
+    chipsEl.appendChild(btn);
+  });
+
+  // ── レビュー生成 ──
+  function generateReview() {
+    var openings = [
+      STORE_NAME + 'さんに伺いました。',
+      '友人に勧められて' + STORE_NAME + 'さんへ。',
+      '前から気になっていた' + STORE_NAME + 'さんに初訪問。',
+      '地元で人気の' + STORE_NAME + 'さんに行ってきました。'
+    ];
+    var closings5 = [
+      'また必ず来ます！大満足です！',
+      'リピート確定です。本当におすすめです！',
+      '友人にも自信を持っておすすめできるお店です！',
+      '最高のお好み焼き体験でした。また伺います！'
+    ];
+    var closings4 = [
+      'とても良いお店です。また伺いたいと思います。',
+      '満足度の高いお食事でした。おすすめです。',
+      '美味しくて雰囲気も良い、素敵なお店です。'
+    ];
+    var closings3 = [
+      '全体的に良いお店だと思います。また機会があれば伺います。',
+      '気軽に楽しめるお店です。'
+    ];
+
+    var parts = [];
+    parts.push(pick(openings));
+
+    if (selectedPoints.length > 0) {
+      var phrases = [];
+      selectedPoints.forEach(function(p) {
+        if (PHRASES[p]) phrases.push(pick(PHRASES[p]));
+      });
+      parts.push(phrases.join('。') + '。');
+    } else {
+      parts.push('料理も接客もとても良く、楽しい時間を過ごせました。');
+    }
+
+    if (currentStars === 5) parts.push(pick(closings5));
+    else if (currentStars === 4) parts.push(pick(closings4));
+    else parts.push(pick(closings3));
+
+    return parts.join('\n\n');
+  }
+
+  // ── 生成ボタン ──
+  $('genBtn').addEventListener('click', function() {
+    if (currentStars === 0) return;
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 生成中...';
+    setTimeout(function() {
+      $('reviewText').value = generateReview();
+      btn.disabled = false;
+      btn.innerHTML = '✨ AIで簡単に自動作成';
+      $('copyWrap').classList.remove('hidden');
+      $('googleWrap').classList.remove('hidden');
+    }, 600);
+  });
+
+  // ── コピーボタン ──
+  $('copyBtn').addEventListener('click', function() {
+    var text = $('reviewText').value;
+    if (!text) return;
+    var btn = this;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '✓ コピーしました！';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = '📋 レビューをコピー';
+          btn.classList.remove('copied');
+        }, 2500);
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ コピーしました！';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = '📋 レビューをコピー';
+        btn.classList.remove('copied');
+      }, 2500);
+    }
+  });
+
+  // ── テキスト編集時 ──
+  $('reviewText').addEventListener('input', function() {
+    if (this.value) {
+      $('copyWrap').classList.remove('hidden');
+      $('googleWrap').classList.remove('hidden');
+    } else {
+      $('copyWrap').classList.add('hidden');
+      $('googleWrap').classList.add('hidden');
+    }
+  });
+
+  // ── GoogleリンクURL設定 ──
+  $('googleBtn').href = GOOGLE_REVIEW_URL;
+
+})();
+</script>
+</body>
+</html>
